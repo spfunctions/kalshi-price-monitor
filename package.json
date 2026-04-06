@@ -1,11 +1,52 @@
 {
   "name": "kalshi-price-monitor",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "description": "Monitor Kalshi and Polymarket prediction market prices in your terminal. Real-time alerts on significant moves.",
   "type": "module",
-  "scripts": {
-    "start": "npx tsx monitor.ts"
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
   },
+  "bin": {
+    "kalshi-price-monitor": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "kalshi",
+    "polymarket",
+    "prediction-markets",
+    "price-monitor",
+    "alerts",
+    "terminal",
+    "real-time",
+    "market-data",
+    "trading",
+    "ai-agents"
+  ],
+  "author": "SimpleFunctions <hello@simplefunctions.dev>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/spfunctions/kalshi-price-monitor"
+  },
+  "homepage": "https://simplefunctions.dev",
   "devDependencies": {
-    "tsx": "^4.0.0"
+    "@types/node": "^20.19.39",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
   }
 }
