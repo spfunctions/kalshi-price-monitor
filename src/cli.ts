@@ -30,9 +30,16 @@ async function main() {
   if (cmd === 'price') {
     const ticker = args[1]
     if (!ticker) { console.error('Usage: kalshi-price-monitor price <TICKER>'); process.exit(1) }
-    const res = await fetch(`https://simplefunctions.dev/api/public/market/${encodeURIComponent(ticker)}?depth=true`)
+    // /api/public/market/{ticker} (singular) does not exist on the live API.
+    // Use the plural /api/public/markets?tickers= and pick the first match.
+    const url = new URL('/api/public/markets', 'https://simplefunctions.dev')
+    url.searchParams.set('tickers', ticker)
+    url.searchParams.set('depth', 'true')
+    const res = await fetch(url.toString())
     if (!res.ok) { console.error(`Error: ${res.status}`); process.exit(1) }
-    const m = await res.json()
+    const data = await res.json() as { markets?: any[] }
+    const m = data?.markets?.[0]
+    if (!m) { console.error(`Market not found: ${ticker}`); process.exit(1) }
     console.log(`${BLD}${m.title}${R}`)
     console.log(`  ${m.venue} | ${m.status} | ${BLD}${m.price}c${R}`)
     if (m.bestBid != null) console.log(`  Bid: ${GRN}${m.bestBid}c${R}  Ask: ${RED}${m.bestAsk}c${R}  Spread: ${m.spread}c`)

@@ -21,20 +21,33 @@ export class PriceMonitor extends EventEmitter {
 
   async fetchPrices(): Promise<MarketSnapshot[]> {
     if (this.tickers.length > 0) {
-      const res = await fetch(`${this.base}/api/public/markets?tickers=${this.tickers.join(',')}`)
+      const url = new URL('/api/public/markets', this.base)
+      url.searchParams.set('tickers', this.tickers.join(','))
+      const res = await fetch(url.toString())
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const data = await res.json()
-      return (data.results || []).map((m: any) => ({
-        ticker: m.ticker, title: m.title, price: m.price,
-        venue: m.venue, spread: m.spread, volume24h: m.volume24h,
+      const data = (await res.json()) as { markets?: Array<Record<string, unknown>> }
+      return (data.markets ?? []).map((m) => ({
+        ticker: String(m.ticker ?? ''),
+        title: String(m.title ?? ''),
+        price: Number(m.price ?? 0),
+        venue: String(m.venue ?? 'unknown'),
+        spread: m.spread as number | undefined,
+        volume24h: m.volume24h as number | undefined,
       }))
     }
     const res = await fetch(`${this.base}/api/agent/world?format=json`)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const data = await res.json()
-    return [...(data.movers || []), ...(data.actionableEdges || [])].map((m: any) => ({
-      ticker: m.ticker, title: m.title, price: m.price || m.marketPrice,
-      venue: m.venue || 'unknown', spread: m.spread, volume24h: m.volume24h,
+    const data = (await res.json()) as {
+      movers?: Array<Record<string, unknown>>
+      actionableEdges?: Array<Record<string, unknown>>
+    }
+    return [...(data.movers ?? []), ...(data.actionableEdges ?? [])].map((m) => ({
+      ticker: String(m.ticker ?? ''),
+      title: String(m.title ?? ''),
+      price: Number(m.price ?? m.marketPrice ?? 0),
+      venue: String(m.venue ?? 'unknown'),
+      spread: m.spread as number | undefined,
+      volume24h: m.volume24h as number | undefined,
     }))
   }
 
